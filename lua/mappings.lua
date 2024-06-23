@@ -62,3 +62,16 @@ if vim.g.neovide == true then
   vim.api.nvim_set_keymap("n", "<C-->", ":lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.1<CR>", { silent = true })
   vim.api.nvim_set_keymap("n", "<C-0>", ":lua vim.g.neovide_scale_factor = 1<CR>", { silent = true })
 end
+
+-- luasnip keymaps
+local ls = require("luasnip")
+
+vim.keymap.set({"i"}, "<A-K>", function() ls.expand() end, {silent = true})
+vim.keymap.set({"i", "s"}, "<A-l>", function() ls.jump( 1) end, {silent = true})
+vim.keymap.set({"i", "s"}, "<A-j>", function() ls.jump(-1) end, {silent = true})
+
+vim.keymap.set({"i", "s"}, "<C-E>", function()
+    if ls.choice_active() then
+        ls.change_choice(1)
+    end
+end, {silent = true})
