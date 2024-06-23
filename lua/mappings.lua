@@ -54,3 +54,11 @@ map("n", "<leader>td", "<cmd>Telescope diagnostics<CR>", { desc = "Telescope Dia
 map("n", "<leader>lr", "<cmd>Telescope lsp_references<CR>", { desc = "Telescope Lsp References" })
 map("n", "<leader>ld", "<cmd>Telescope lsp_definitions<CR>", { desc = "Telescope Definition" })
 map("n", "<leader>li", "<cmd>Telescope lsp_implementations<CR>", { desc = "Telescope Implementations" })
+
+-- Neovide Settings
+if vim.g.neovide == true then
+  vim.g.neovide_scale_factor = 0.8
+  vim.api.nvim_set_keymap("n", "<C-=>", ":lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.1<CR>", { silent = true })
+  vim.api.nvim_set_keymap("n", "<C-->", ":lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.1<CR>", { silent = true })
+  vim.api.nvim_set_keymap("n", "<C-0>", ":lua vim.g.neovide_scale_factor = 1<CR>", { silent = true })
+end

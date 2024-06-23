@@ -5,7 +5,7 @@
 local M = {}
 
 M.ui = {
-    theme = "radium",
+    theme = "ayu_dark",
     nvdash = {
         load_on_startup = true,
         buttons = {
