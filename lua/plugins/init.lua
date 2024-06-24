@@ -20,6 +20,11 @@ return {
     },
 
     {
+        "mbbill/undotree",
+        lazy = false,
+    },
+
+    {
         "williamboman/mason.nvim",
         opts = {
             ensure_installed = {

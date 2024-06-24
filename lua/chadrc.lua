@@ -22,6 +22,15 @@ M.ui = {
     -- 	Comment = { italic = true },
     -- 	["@comment"] = { italic = true },
     -- },
+--     statusline = {
+--         order = {"mode", "file", "git", "%=", "lsp_msg", "%=", "diagnostics", "lsp", "cwd", "cursor", "session"}, -- check stl/utils.lua file in ui repo 
+--         modules = {
+--             session = function()
+--                 local session_name = require('possession.session').get_session_name() or ''
+--                 return session_name
+--             end
+--         }
+--     }
 }
 
 return M
