@@ -28,10 +28,10 @@ return {
         "williamboman/mason.nvim",
         opts = {
             ensure_installed = {
-                "lua-language-server", "stylua", "typst-lsp",
-                "html-lsp", "css-lsp", "prettier", "black",
+                "lua-language-server", "stylua", "tinymist",
+                "html-lsp", "hyprls", "css-lsp", "prettier", "black",
                 "rust-analyzer", "gopls", "mypy", "ruff",
-                "pyright", "black"
+                "pyright", "black", "zls", "wgsl-analyzer",
             },
         },
     },
@@ -50,8 +50,8 @@ return {
         "nvim-treesitter/nvim-treesitter",
         opts = {
             ensure_installed = {
-                "vim", "lua", "vimdoc",
-                "html", "css"
+                "vim", "lua", "vimdoc", "rust", "wgsl",
+                "hyprlang", "html", "css"
             },
             indent = { enable = true },
         },

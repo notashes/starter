@@ -16,7 +16,7 @@ for _, lsp in ipairs(servers) do
 end
 
 -- typescript
-lspconfig.tsserver.setup {
+lspconfig.ts_ls.setup {
     on_attach = on_attach,
     on_init = on_init,
     capabilities = capabilities,
@@ -63,7 +63,7 @@ lspconfig.pyright.setup {
     },
 }
 
-lspconfig.ruff_lsp.setup {
+lspconfig.ruff.setup {
     on_attach = function (client, _)
         client.server_capabilities.hoverProvider = false
     end,
@@ -77,4 +77,34 @@ lspconfig.ruff_lsp.setup {
     }
 }
 
-lspconfig.typst_lsp.setup {}
+lspconfig.clangd.setup {
+    on_attach = function (client, bufnr)
+        client.server_capabilities.signatureHelpProvider = false
+        on_attach(client, bufnr)
+    end,
+    capabilities = capabilities,
+    settings = {
+        clangd = {
+            -- todo 
+        }
+    }
+}
+
+lspconfig.zls.setup {}
+lspconfig.wgsl_analyzer.setup {}
+
+lspconfig.tinymist.setup {
+    single_file_support = true,
+        root_dir = function()
+          return vim.fn.getcwd()
+        end,
+	on_init = on_init,
+	on_attach = on_attach,
+	capabilities = capabilities,
+	settings = {
+		formatterPrintWidth = 90,
+        exportPdf = "onType",
+        outputPath = "$root/target/$dir/$name",
+        formatterMode = "typstyle",
+	},
+}

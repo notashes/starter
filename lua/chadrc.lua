@@ -5,7 +5,6 @@
 local M = {}
 
 M.ui = {
-    theme = "ayu_dark",
     nvdash = {
         load_on_startup = true,
         buttons = {
@@ -31,6 +30,14 @@ M.ui = {
 --             end
 --         }
 --     }
+}
+
+M.base46 = {
+    theme = "ayu_dark_better"
+}
+
+M.nvdash = {
+  load_on_startup = true,
 }
 
 return M
