@@ -141,4 +141,8 @@ return {
         },
         config = true,
     },
+
+    {   "olimorris/codecompanion.nvim",
+        lazy = false
+    }
 }
