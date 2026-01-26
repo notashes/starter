@@ -1,33 +1,59 @@
--- EXAMPLE 
+-- Migrated to nvim 0.11 native LSP config API
 local on_attach = require("nvchad.configs.lspconfig").on_attach
 local on_init = require("nvchad.configs.lspconfig").on_init
 local capabilities = require("nvchad.configs.lspconfig").capabilities
 
-local lspconfig = require "lspconfig"
-local servers = { "html", "cssls" }
-local util = require "lspconfig/util"
-
-for _, lsp in ipairs(servers) do
-    lspconfig[lsp].setup {
-        on_attach = on_attach,
-        on_init = on_init,
-        capabilities = capabilities,
-    }
+-- Helper for root pattern
+local function root_pattern(...)
+    local patterns = {...}
+    return function(fname)
+        local util = vim.fs
+        for _, pattern in ipairs(patterns) do
+            local found = util.find(pattern, { path = fname, upward = true })
+            if found and #found > 0 then
+                return vim.fs.dirname(found[1])
+            end
+        end
+    end
 end
 
--- typescript
-lspconfig.ts_ls.setup {
+-- HTML
+vim.lsp.config.html = {
+    cmd = { 'vscode-html-language-server', '--stdio' },
+    filetypes = { 'html' },
+    root_dir = root_pattern('.git'),
     on_attach = on_attach,
     on_init = on_init,
     capabilities = capabilities,
 }
 
-lspconfig.gopls.setup {
+-- CSS
+vim.lsp.config.cssls = {
+    cmd = { 'vscode-css-language-server', '--stdio' },
+    filetypes = { 'css', 'scss', 'less' },
+    root_dir = root_pattern('.git'),
+    on_attach = on_attach,
+    on_init = on_init,
+    capabilities = capabilities,
+}
+
+-- TypeScript
+vim.lsp.config.ts_ls = {
+    cmd = { 'typescript-language-server', '--stdio' },
+    filetypes = { 'javascript', 'javascriptreact', 'javascript.jsx', 'typescript', 'typescriptreact', 'typescript.tsx' },
+    root_dir = root_pattern('tsconfig.json', 'package.json', '.git'),
+    on_attach = on_attach,
+    on_init = on_init,
+    capabilities = capabilities,
+}
+
+-- Go
+vim.lsp.config.gopls = {
+    cmd = { 'gopls' },
+    filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
+    root_dir = root_pattern('go.work', 'go.mod', '.git'),
     on_attach = on_attach,
     capabilities = capabilities,
-    cmd = {"gopls"},
-    filetypes = {"go", "gomod", "gowork", "gotmpl"},
-    root_dir = util.root_pattern("go.work", "go.mod", ".git"),
     settings = {
         gopls = {
             completeUnimported = true,
@@ -35,76 +61,96 @@ lspconfig.gopls.setup {
             analyses = {
                 unusedparams = true,
             },
-            ["ui.inlayhint.hints"] = {
+            ['ui.inlayhint.hints'] = {
                 compositeLiteralFields = true,
                 constantValues = true,
                 parameterNames = true
             },
-
         },
     },
 }
 
-lspconfig.pyright.setup {
+-- Python
+vim.lsp.config.pyright = {
+    cmd = { 'pyright-langserver', '--stdio' },
+    filetypes = { 'python' },
+    root_dir = root_pattern('pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', '.git'),
     on_attach = on_attach,
     capabilities = capabilities,
-    filetypes = {"python"},
     settings = {
         pyright = {
-            -- Using Ruff's import organizer
             disableOrganizeImports = true,
         },
         python = {
             analysis = {
-                -- Ignore all files for analysis to exclusively use Ruff for linting
                 ignore = { '*' },
             },
         },
     },
 }
 
-lspconfig.ruff.setup {
-    on_attach = function (client, _)
+-- Ruff
+vim.lsp.config.ruff = {
+    cmd = { 'ruff', 'server' },
+    filetypes = { 'python' },
+    root_dir = root_pattern('pyproject.toml', 'ruff.toml', '.git'),
+    on_attach = function(client, bufnr)
         client.server_capabilities.hoverProvider = false
+        if on_attach then on_attach(client, bufnr) end
     end,
     on_init = on_init,
     capabilities = capabilities,
     init_options = {
         settings = {
-            -- Any extra CLI arguments for `ruff` go here.
             args = {},
         }
-    }
+    },
 }
 
-lspconfig.clangd.setup {
-    on_attach = function (client, bufnr)
+-- Clangd
+vim.lsp.config.clangd = {
+    cmd = { 'clangd' },
+    filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda' },
+    root_dir = root_pattern('compile_commands.json', 'compile_flags.txt', '.git'),
+    on_attach = function(client, bufnr)
         client.server_capabilities.signatureHelpProvider = false
-        on_attach(client, bufnr)
+        if on_attach then on_attach(client, bufnr) end
     end,
     capabilities = capabilities,
     settings = {
-        clangd = {
-            -- todo 
-        }
-    }
+        clangd = {}
+    },
 }
 
-lspconfig.zls.setup {}
-lspconfig.wgsl_analyzer.setup {}
+-- Zig
+vim.lsp.config.zls = {
+    cmd = { 'zls' },
+    filetypes = { 'zig', 'zir' },
+    root_dir = root_pattern('zls.json', 'build.zig', '.git'),
+}
 
-lspconfig.tinymist.setup {
+-- WGSL
+vim.lsp.config.wgsl_analyzer = {
+    cmd = { 'wgsl_analyzer' },
+    filetypes = { 'wgsl' },
+    root_dir = root_pattern('.git'),
+}
+
+-- Tinymist (Typst)
+vim.lsp.config.tinymist = {
+    cmd = { 'tinymist' },
+    filetypes = { 'typst' },
     single_file_support = true,
-        root_dir = function()
-          return vim.fn.getcwd()
-        end,
-	on_init = on_init,
-	on_attach = on_attach,
-	capabilities = capabilities,
-	settings = {
-		formatterPrintWidth = 90,
+    root_dir = function()
+        return vim.fn.getcwd()
+    end,
+    on_init = on_init,
+    on_attach = on_attach,
+    capabilities = capabilities,
+    settings = {
+        formatterPrintWidth = 90,
         exportPdf = "onType",
         outputPath = "$root/target/$dir/$name",
         formatterMode = "typstyle",
-	},
+    },
 }

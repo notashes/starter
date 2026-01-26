@@ -46,7 +46,7 @@ M.ui = {
 }
 
 M.base46 = {
-    theme = "ayu_dark_better"
+    theme = "ayu_dark"
 }
 
 M.nvdash = {
@@ -58,5 +58,19 @@ M.nvdash = {
 --       bg = "black2",
 --     },
 -- },
+
+-- M.plugins = {
+--     -- ...
+--     ["nvim-telescope/telescope.nvim"] = {
+--         override_options = function()
+--             return {
+--                 defaults = {
+--                     wrap_results = true;
+--                 },
+--             }
+--         end,
+--     },
+--     -- ...
+-- }
 
 return M

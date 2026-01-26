@@ -1,4 +1,12 @@
 return {
+    -- Fix nvim-tree window ratio issues
+    {
+        "nvim-tree/nvim-tree.lua",
+        opts = function()
+            return require "configs.nvimtree"
+        end,
+    },
+
     {
         "stevearc/conform.nvim",
         -- event = 'BufWritePre', -- uncomment for format on save
@@ -30,11 +38,23 @@ return {
             ensure_installed = {
                 "lua-language-server", "stylua", "tinymist",
                 "html-lsp", "hyprls", "css-lsp", "prettier", "black",
-                "rust-analyzer", "gopls", "mypy", "ruff",
+                "gopls", "mypy", "ruff",
                 "pyright", "black", "zls", "wgsl-analyzer",
+                "jdtls", "java-debug-adapter", "java-test",
+                "codelldb",  -- Rust debugger
+                "taplo",     -- TOML LSP for Cargo.toml
             },
         },
     },
+
+      {
+        "nvim-telescope/telescope.nvim",
+        opts = {
+          defaults = {
+                wrap_results = true,
+          },
+        },
+      },
 
 
     {
@@ -51,7 +71,7 @@ return {
         opts = {
             ensure_installed = {
                 "vim", "lua", "vimdoc", "rust", "wgsl",
-                "hyprlang", "html", "css"
+                "hyprlang", "html", "css", "java", "thrift"
             },
             indent = { enable = true },
         },
@@ -71,16 +91,6 @@ return {
         init = function()
             vim.g.rustfmt_autosave = 1
         end
-    },
-
-    {
-        'saecki/crates.nvim',
-        tag = 'stable',
-        ft = { "rust", "toml" },
-        config = function()
-            require('crates').setup()
-            require('crates').show()
-        end,
     },
 
     {
