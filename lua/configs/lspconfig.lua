@@ -3,6 +3,27 @@ local on_attach = require("nvchad.configs.lspconfig").on_attach
 local on_init = require("nvchad.configs.lspconfig").on_init
 local capabilities = require("nvchad.configs.lspconfig").capabilities
 
+-- Custom on_attach: wraps NvChad's on_attach and adds global LSP keymaps
+local custom_on_attach = function(client, bufnr)
+    on_attach(client, bufnr)
+    local map = vim.keymap.set
+    local opts = { buffer = bufnr }
+
+    -- Code actions & refactoring (overridden by rustaceanvim for Rust)
+    map("n", "<leader>ca", vim.lsp.buf.code_action, { buffer = bufnr, desc = "Code Action" })
+    map("n", "<leader>rn", function()
+        return ":IncRename " .. vim.fn.expand("<cword>")
+    end, { buffer = bufnr, desc = "Rename", expr = true })
+    map("n", "<leader>sh", vim.lsp.buf.signature_help, { buffer = bufnr, desc = "Signature Help" })
+
+    -- Telescope LSP pickers
+    map("n", "<leader>ls", "<cmd>Telescope lsp_document_symbols<CR>", { buffer = bufnr, desc = "Document Symbols" })
+    map("n", "<leader>lS", "<cmd>Telescope lsp_dynamic_workspace_symbols<CR>", { buffer = bufnr, desc = "Workspace Symbols" })
+
+    -- Line diagnostics
+    map("n", "gl", vim.diagnostic.open_float, { buffer = bufnr, desc = "Line Diagnostics" })
+end
+
 -- Helper for root pattern
 local function root_pattern(...)
     local patterns = {...}
@@ -22,7 +43,7 @@ vim.lsp.config.html = {
     cmd = { 'vscode-html-language-server', '--stdio' },
     filetypes = { 'html' },
     root_dir = root_pattern('.git'),
-    on_attach = on_attach,
+    on_attach = custom_on_attach,
     on_init = on_init,
     capabilities = capabilities,
 }
@@ -32,7 +53,7 @@ vim.lsp.config.cssls = {
     cmd = { 'vscode-css-language-server', '--stdio' },
     filetypes = { 'css', 'scss', 'less' },
     root_dir = root_pattern('.git'),
-    on_attach = on_attach,
+    on_attach = custom_on_attach,
     on_init = on_init,
     capabilities = capabilities,
 }
@@ -42,7 +63,7 @@ vim.lsp.config.ts_ls = {
     cmd = { 'typescript-language-server', '--stdio' },
     filetypes = { 'javascript', 'javascriptreact', 'javascript.jsx', 'typescript', 'typescriptreact', 'typescript.tsx' },
     root_dir = root_pattern('tsconfig.json', 'package.json', '.git'),
-    on_attach = on_attach,
+    on_attach = custom_on_attach,
     on_init = on_init,
     capabilities = capabilities,
 }
@@ -52,7 +73,7 @@ vim.lsp.config.gopls = {
     cmd = { 'gopls' },
     filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
     root_dir = root_pattern('go.work', 'go.mod', '.git'),
-    on_attach = on_attach,
+    on_attach = custom_on_attach,
     capabilities = capabilities,
     settings = {
         gopls = {
@@ -75,7 +96,7 @@ vim.lsp.config.pyright = {
     cmd = { 'pyright-langserver', '--stdio' },
     filetypes = { 'python' },
     root_dir = root_pattern('pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', '.git'),
-    on_attach = on_attach,
+    on_attach = custom_on_attach,
     capabilities = capabilities,
     settings = {
         pyright = {
@@ -96,7 +117,7 @@ vim.lsp.config.ruff = {
     root_dir = root_pattern('pyproject.toml', 'ruff.toml', '.git'),
     on_attach = function(client, bufnr)
         client.server_capabilities.hoverProvider = false
-        if on_attach then on_attach(client, bufnr) end
+        custom_on_attach(client, bufnr)
     end,
     on_init = on_init,
     capabilities = capabilities,
@@ -114,7 +135,7 @@ vim.lsp.config.clangd = {
     root_dir = root_pattern('compile_commands.json', 'compile_flags.txt', '.git'),
     on_attach = function(client, bufnr)
         client.server_capabilities.signatureHelpProvider = false
-        if on_attach then on_attach(client, bufnr) end
+        custom_on_attach(client, bufnr)
     end,
     capabilities = capabilities,
     settings = {
@@ -145,7 +166,7 @@ vim.lsp.config.tinymist = {
         return vim.fn.getcwd()
     end,
     on_init = on_init,
-    on_attach = on_attach,
+    on_attach = custom_on_attach,
     capabilities = capabilities,
     settings = {
         formatterPrintWidth = 90,

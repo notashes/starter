@@ -15,9 +15,9 @@ map("v", "K", ":m '<-2<CR>gv=gv")
 map("n", "<C-d>", "<C-d>zz")
 map("n", "<C-u>", "<C-u>zz")
 
--- Search term stays in the middle
-map("n", "n", "nzzzv")
-map("n", "N", "Nzzzv")
+-- Search term stays in the middle (handled by hlslens with zzzv)
+-- map("n", "n", "nzzzv")
+-- map("n", "N", "Nzzzv")
 
 -- map for resizing vertical splits
 map("n", "<M-Right>", ":vertical resize +1<CR>")
@@ -109,7 +109,7 @@ end
 map("n", "<C-n>", safe_nvimtree_toggle, { desc = "Toggle nvim-tree (safe)" })
 map("n", "<leader>e", nvimtree_focus_or_cycle, { desc = "Focus nvim-tree (safe)" })
 
--- map({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
+map({ "n", "i", "v" }, "<C-s>", "<cmd>w<CR>", { desc = "Save" })
 -- experimental
 -- map("n", "<A-k>", "<cmd>cnext<CR>zz")
 -- map("n", "<A-j>", "<cmd>cprev<CR>zz")
@@ -118,7 +118,31 @@ map("n", "<leader>j", "<cmd>lprev<CR>zz")
 
 -- telescope stuff
 map("n", "<leader>td", "<cmd>Telescope diagnostics<CR>", { desc = "Telescope Diagonistcs " })
-map("n", "<leader>gc", "<cmd>Telescope git_commits<CR>", { desc = "Telescope Diagonistcs " })
+-- Git (Telescope) — register which-key group
+local wk = require("which-key")
+wk.add({
+    { "<leader>b", group = "Buffer" },
+    { "<leader>c", group = "Code/Crates" },
+    { "<leader>d", group = "Debug" },
+    { "<leader>f", group = "Find/Files" },
+    { "<leader>g", group = "Git" },
+    { "<leader>h", group = "Hunk" },
+    { "<leader>l", group = "LSP" },
+    { "<leader>m", group = "Macro/Move/Mark" },
+    { "<leader>n", group = "Neotest" },
+    { "<leader>q", group = "Quickfix" },
+    { "<leader>r", group = "Rust/Run" },
+    { "<leader>s", group = "Search" },
+    { "<leader>t", group = "Terminal" },
+    { "<leader>w", group = "Window/Save" },
+    { "<leader>x", group = "Trouble" },
+})
+
+map("n", "<leader>gs", "<cmd>Telescope git_status<CR>", { desc = "Git Status" })
+map("n", "<leader>gc", "<cmd>Telescope git_commits<CR>", { desc = "Git Commits" })
+map("n", "<leader>gC", "<cmd>Telescope git_bcommits<CR>", { desc = "Git Buffer Commits" })
+map("n", "<leader>gb", "<cmd>Telescope git_branches<CR>", { desc = "Git Branches" })
+map("n", "<leader>gS", "<cmd>Telescope git_stash<CR>", { desc = "Git Stash" })
 map("n", "<leader>lr", "<cmd>Telescope lsp_references<CR>", { desc = "Telescope Lsp References" })
 map("n", "<leader>ld", "<cmd>Telescope lsp_definitions<CR>", { desc = "Telescope Definition" })
 map("n", "<leader>li", "<cmd>Telescope lsp_implementations<CR>", { desc = "Telescope Implementations" })
@@ -147,6 +171,15 @@ vim.keymap.set({"i", "s"}, "<C-E>", function()
     end
 end, {silent = true})
 
+-- Scroll inside noice hover/signature windows
+vim.keymap.set({ "n", "i", "s" }, "<c-f>", function()
+    if not require("noice.lsp").scroll(4) then return "<c-f>" end
+end, { silent = true, expr = true, desc = "Scroll hover forward" })
+
+vim.keymap.set({ "n", "i", "s" }, "<c-b>", function()
+    if not require("noice.lsp").scroll(-4) then return "<c-b>" end
+end, { silent = true, expr = true, desc = "Scroll hover backward" })
+
 -- Format with conform.nvim
 map("n", "<leader>fm", function()
     require("conform").format({ async = true, lsp_fallback = true })
@@ -168,8 +201,8 @@ map("n", "[w", function()
     vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.WARN })
 end, { desc = "Prev Warning" })
 
--- Show diagnostics in floating window (changed from <leader>e to avoid conflict)
-map("n", "<leader>de", vim.diagnostic.open_float, { desc = "Show Line Diagnostics" })
+-- Show diagnostics in floating window
+map("n", "gl", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
 
 -- Quick access to Cargo.toml
 map("n", "<leader>fC", function()
@@ -182,7 +215,7 @@ map("n", "<leader>fC", function()
 end, { desc = "Open Cargo.toml" })
 
 -- Quick access to main.rs or lib.rs
-map("n", "<leader>fm", function()
+map("n", "<leader>fe", function()
     local main_rs = vim.fn.findfile("src/main.rs", ".;")
     local lib_rs = vim.fn.findfile("src/lib.rs", ".;")
     if main_rs ~= "" then
@@ -212,3 +245,17 @@ map("n", "<leader>w", function()
     vim.cmd("write")
     require("conform").format({ async = true, lsp_fallback = true })
 end, { desc = "Save and Format" })
+
+-- Join lines without moving cursor
+map("n", "J", "mzJ`z", { desc = "Join Lines" })
+
+-- Toggle quickfix window
+map("n", "<leader>q", function()
+    for _, win in ipairs(vim.fn.getwininfo()) do
+        if win.quickfix == 1 then
+            vim.cmd("cclose")
+            return
+        end
+    end
+    vim.cmd("copen")
+end, { desc = "Toggle Quickfix" })

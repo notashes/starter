@@ -56,6 +56,14 @@ return {
         },
       },
 
+    {
+        "nvim-telescope/telescope-fzf-native.nvim",
+        build = "make",
+        dependencies = "nvim-telescope/telescope.nvim",
+        config = function()
+            require("telescope").load_extension("fzf")
+        end,
+    },
 
     {
         "nvim-treesitter/nvim-treesitter-context",
@@ -78,18 +86,69 @@ return {
     },
 
     {
+        "nvim-treesitter/nvim-treesitter-textobjects",
+        dependencies = "nvim-treesitter/nvim-treesitter",
+        event = "BufReadPost",
+        config = function()
+            require("nvim-treesitter.configs").setup({
+                textobjects = {
+                    select = {
+                        enable = true,
+                        lookahead = true,
+                        keymaps = {
+                            ["af"] = { query = "@function.outer", desc = "Around function" },
+                            ["if"] = { query = "@function.inner", desc = "Inside function" },
+                            ["ac"] = { query = "@class.outer", desc = "Around class/impl" },
+                            ["ic"] = { query = "@class.inner", desc = "Inside class/impl" },
+                            ["aa"] = { query = "@parameter.outer", desc = "Around argument" },
+                            ["ia"] = { query = "@parameter.inner", desc = "Inside argument" },
+                            ["ai"] = { query = "@conditional.outer", desc = "Around conditional" },
+                            ["ii"] = { query = "@conditional.inner", desc = "Inside conditional" },
+                            ["al"] = { query = "@loop.outer", desc = "Around loop" },
+                            ["il"] = { query = "@loop.inner", desc = "Inside loop" },
+                        },
+                    },
+                    move = {
+                        enable = true,
+                        set_jumps = true,
+                        goto_next_start = {
+                            ["]f"] = { query = "@function.outer", desc = "Next function" },
+                            ["]c"] = { query = "@class.outer", desc = "Next class/impl" },
+                            ["]a"] = { query = "@parameter.inner", desc = "Next argument" },
+                        },
+                        goto_next_end = {
+                            ["]F"] = { query = "@function.outer", desc = "Next function end" },
+                            ["]C"] = { query = "@class.outer", desc = "Next class/impl end" },
+                        },
+                        goto_previous_start = {
+                            ["[f"] = { query = "@function.outer", desc = "Prev function" },
+                            ["[c"] = { query = "@class.outer", desc = "Prev class/impl" },
+                            ["[a"] = { query = "@parameter.inner", desc = "Prev argument" },
+                        },
+                        goto_previous_end = {
+                            ["[F"] = { query = "@function.outer", desc = "Prev function end" },
+                            ["[C"] = { query = "@class.outer", desc = "Prev class/impl end" },
+                        },
+                    },
+                    swap = {
+                        enable = true,
+                        swap_next = {
+                            ["<leader>a"] = { query = "@parameter.inner", desc = "Swap with next arg" },
+                        },
+                        swap_previous = {
+                            ["<leader>A"] = { query = "@parameter.inner", desc = "Swap with prev arg" },
+                        },
+                    },
+                },
+            })
+        end,
+    },
+
+    {
         "nvimtools/none-ls.nvim",
         ft = { "go", "python" },
         opts = function()
             return require "configs.none-ls"
-        end
-    },
-
-    {
-        "rust-lang/rust.vim",
-        ft = "rust",
-        init = function()
-            vim.g.rustfmt_autosave = 1
         end
     },
 
@@ -138,18 +197,6 @@ return {
         opts = {
             -- options
         },
-    },
-
-    {
-        "amitds1997/remote-nvim.nvim",
-        lazy = false,
-        version = "*",                       -- Pin to GitHub releases
-        dependencies = {
-            "nvim-lua/plenary.nvim",         -- For standard functions
-            "MunifTanjim/nui.nvim",          -- To build the plugin UI
-            "nvim-telescope/telescope.nvim", -- For picking b/w different remote methods
-        },
-        config = true,
     },
 
     {   "olimorris/codecompanion.nvim",

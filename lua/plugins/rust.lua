@@ -88,26 +88,12 @@ return {
                         vim.cmd.RustLsp("testables")
                     end, vim.tbl_extend("force", opts, { desc = "Rust Testables" }))
 
-                    -- ===== CARGO COMMANDS =====
-                    map("n", "<leader>rc", function()
-                        vim.cmd("!cargo check")
-                    end, vim.tbl_extend("force", opts, { desc = "Cargo Check" }))
-
-                    map("n", "<leader>rb", function()
-                        vim.cmd("!cargo build")
-                    end, vim.tbl_extend("force", opts, { desc = "Cargo Build" }))
-
-                    map("n", "<leader>rx", function()
-                        vim.cmd("!cargo run")
-                    end, vim.tbl_extend("force", opts, { desc = "Cargo Run" }))
-
-                    map("n", "<leader>rT", function()
-                        vim.cmd("!cargo test")
-                    end, vim.tbl_extend("force", opts, { desc = "Cargo Test All" }))
-
-                    map("n", "<leader>rC", function()
-                        vim.cmd("!cargo clippy")
-                    end, vim.tbl_extend("force", opts, { desc = "Cargo Clippy" }))
+                    -- ===== CARGO COMMANDS (non-blocking via toggleterm) =====
+                    map("n", "<leader>rc", "<cmd>TermExec cmd='cargo check'<CR>", vim.tbl_extend("force", opts, { desc = "Cargo Check" }))
+                    map("n", "<leader>rb", "<cmd>TermExec cmd='cargo build'<CR>", vim.tbl_extend("force", opts, { desc = "Cargo Build" }))
+                    map("n", "<leader>rx", "<cmd>TermExec cmd='cargo run'<CR>", vim.tbl_extend("force", opts, { desc = "Cargo Run" }))
+                    map("n", "<leader>rT", "<cmd>TermExec cmd='cargo test'<CR>", vim.tbl_extend("force", opts, { desc = "Cargo Test All" }))
+                    map("n", "<leader>rC", "<cmd>TermExec cmd='cargo clippy'<CR>", vim.tbl_extend("force", opts, { desc = "Cargo Clippy" }))
 
                     -- ===== MACROS & EXPANSION =====
                     map("n", "<leader>me", function()
@@ -171,12 +157,17 @@ return {
                     map("n", "<leader>sh", vim.lsp.buf.signature_help, vim.tbl_extend("force", opts, { desc = "Signature Help" }))
                     map("n", "<leader>D", vim.lsp.buf.type_definition, vim.tbl_extend("force", opts, { desc = "Type Definition" }))
                     map("n", "<leader>gr", vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "References" }))
-                    map("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename" }))
+                    map("n", "<leader>rn", function()
+                        return ":IncRename " .. vim.fn.expand("<cword>")
+                    end, vim.tbl_extend("force", opts, { desc = "Rename", expr = true }))
                 end,
                 default_settings = {
                     -- Settings will be loaded from .rust-analyzer.json automatically
                     -- Only override UI preferences here
                     ["rust-analyzer"] = {
+                        -- Use clippy for on-save checks
+                        check = { command = "clippy" },
+
                         -- Proc macro ignores (not in .rust-analyzer.json)
                         procMacro = {
                             ignored = {

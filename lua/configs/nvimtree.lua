@@ -12,7 +12,7 @@ return {
         update_root = false,
     },
     view = {
-        adaptive_size = false,
+        adaptive_size = true,
         side = "left",
         width = 30,
         preserve_window_proportions = true,
@@ -30,6 +30,7 @@ return {
     },
     actions = {
         open_file = {
+            quit_on_open = false,
             resize_window = false,
             window_picker = {
                 enable = true,
@@ -39,7 +40,7 @@ return {
     renderer = {
         root_folder_label = false,
         highlight_git = true,
-        indent_markers = { enable = false },
+        indent_markers = { enable = true },
         icons = {
             show = {
                 file = true,
@@ -48,18 +49,18 @@ return {
                 git = true,
             },
             glyphs = {
-                default = "󰈚",
-                symlink = "",
-                folder = {
-                    default = "",
-                    empty = "",
-                    empty_open = "",
-                    open = "",
-                    symlink = "",
-                    symlink_open = "",
-                    arrow_open = "",
-                    arrow_closed = "",
-                },
+                -- default = "󰈚",
+                -- symlink = "",
+                -- folder = {
+                --     default = "",
+                --     empty = "",
+                --     empty_open = "",
+                --     open = "",
+                --     symlink = "",
+                --     symlink_open = "",
+                --     arrow_open = "",
+                --     arrow_closed = "",
+                -- },
                 git = {
                     unstaged = "✗",
                     staged = "✓",

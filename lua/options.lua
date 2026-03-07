@@ -132,14 +132,14 @@ vim.api.nvim_create_autocmd("FocusLost", {
     desc = "Auto-save on focus lost",
 })
 
--- Highlight on yank
-vim.api.nvim_create_autocmd("TextYankPost", {
-    pattern = "*",
-    callback = function()
-        vim.highlight.on_yank({ higroup = "IncSearch", timeout = 200 })
-    end,
-    desc = "Highlight on yank",
-})
+-- Highlight on yank (handled by yanky.nvim)
+-- vim.api.nvim_create_autocmd("TextYankPost", {
+--     pattern = "*",
+--     callback = function()
+--         vim.highlight.on_yank({ higroup = "IncSearch", timeout = 200 })
+--     end,
+--     desc = "Highlight on yank",
+-- })
 
 -- Remember last position in file
 vim.api.nvim_create_autocmd("BufReadPost", {
@@ -173,6 +173,15 @@ vim.api.nvim_create_autocmd("FileType", {
         vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true })
     end,
     desc = "Close with q",
+})
+
+-- Disable wrap for .plan files
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+    pattern = "*.plan",
+    callback = function()
+        vim.opt_local.wrap = false
+    end,
+    desc = "No wrap for .plan files",
 })
 
 -- Better formatting for Rust

@@ -25,6 +25,15 @@ return {
     {
         "akinsho/toggleterm.nvim",
         version = "*",
+        keys = {
+            { "<leader>gg", "<cmd>lua _LAZYGIT_TOGGLE()<CR>", desc = "Lazygit" },
+            { "<leader>tw", "<cmd>lua _CARGO_WATCH_TOGGLE()<CR>", desc = "Toggle Cargo Watch" },
+            { "<leader>tR", "<cmd>lua _CARGO_RUN_TOGGLE()<CR>", desc = "Toggle Cargo Run Terminal" },
+            { "<leader>tT", "<cmd>lua _CARGO_TEST_TOGGLE()<CR>", desc = "Toggle Cargo Test Terminal" },
+            { "<leader>th", "<cmd>ToggleTerm direction=horizontal<CR>", desc = "Toggle Horizontal Terminal" },
+            { "<leader>tv", "<cmd>ToggleTerm direction=vertical<CR>", desc = "Toggle Vertical Terminal" },
+            { "<leader>tf", "<cmd>ToggleTerm direction=float<CR>", desc = "Toggle Floating Terminal" },
+        },
         opts = {
             size = function(term)
                 if term.direction == "horizontal" then
@@ -91,25 +100,17 @@ return {
                 cargo_test:toggle()
             end
 
-            -- Keymaps for custom terminals
-            vim.keymap.set("n", "<leader>tw", "<cmd>lua _CARGO_WATCH_TOGGLE()<CR>", { desc = "Toggle Cargo Watch" })
-            vim.keymap.set("n", "<leader>tR", "<cmd>lua _CARGO_RUN_TOGGLE()<CR>", { desc = "Toggle Cargo Run Terminal" })
-            vim.keymap.set("n", "<leader>tT", "<cmd>lua _CARGO_TEST_TOGGLE()<CR>", { desc = "Toggle Cargo Test Terminal" })
+            -- Lazygit terminal
+            local lazygit = Terminal:new({ cmd = "lazygit", direction = "float", hidden = true })
+            function _LAZYGIT_TOGGLE()
+                lazygit:toggle()
+            end
 
-            -- General terminal keymaps
-            vim.keymap.set("n", "<leader>th", "<cmd>ToggleTerm direction=horizontal<CR>", { desc = "Toggle Horizontal Terminal" })
-            vim.keymap.set("n", "<leader>tv", "<cmd>ToggleTerm direction=vertical<CR>", { desc = "Toggle Vertical Terminal" })
-            vim.keymap.set("n", "<leader>tf", "<cmd>ToggleTerm direction=float<CR>", { desc = "Toggle Floating Terminal" })
-
-            -- Better terminal navigation
+            -- Terminal keymaps (navigation handled by zellij-nav via Alt+hjkl)
             function _G.set_terminal_keymaps()
                 local opts = { buffer = 0 }
                 vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], opts)
                 vim.keymap.set("t", "jk", [[<C-\><C-n>]], opts)
-                vim.keymap.set("t", "<C-h>", [[<Cmd>wincmd h<CR>]], opts)
-                vim.keymap.set("t", "<C-j>", [[<Cmd>wincmd j<CR>]], opts)
-                vim.keymap.set("t", "<C-k>", [[<Cmd>wincmd k<CR>]], opts)
-                vim.keymap.set("t", "<C-l>", [[<Cmd>wincmd l<CR>]], opts)
             end
 
             vim.cmd("autocmd! TermOpen term://* lua set_terminal_keymaps()")
@@ -209,8 +210,13 @@ return {
             -- Folding keymaps
             vim.keymap.set("n", "zR", require("ufo").openAllFolds, { desc = "Open all folds" })
             vim.keymap.set("n", "zM", require("ufo").closeAllFolds, { desc = "Close all folds" })
-            vim.keymap.set("n", "zr", require("ufo").openFoldsExceptKinds, { desc = "Open folds except kinds" })
-            vim.keymap.set("n", "zm", require("ufo").closeFoldsWith, { desc = "Close folds with" })
+            vim.keymap.set("n", "zr", function()
+                require("ufo").openFoldsExceptKinds({ "comment", "imports" })
+            end, { desc = "Open folds except comments/imports" })
+            vim.keymap.set("n", "zm", function()
+                require("ufo").closeFoldsWith(1)
+            end, { desc = "Close folds to level 1" })
+            vim.keymap.set("n", "<CR>", "za", { desc = "Toggle fold under cursor" })
             vim.keymap.set("n", "zp", require("ufo").peekFoldedLinesUnderCursor, { desc = "Peek fold" })
 
             -- Set fold level
@@ -337,8 +343,8 @@ return {
             vim.keymap.set("n", "]h", gs.next_hunk, { desc = "Next Git Hunk" })
             vim.keymap.set("n", "[h", gs.prev_hunk, { desc = "Prev Git Hunk" })
             vim.keymap.set("n", "<leader>gp", gs.preview_hunk, { desc = "Preview Hunk" })
-            vim.keymap.set("n", "<leader>gb", gs.blame_line, { desc = "Blame Line" })
-            vim.keymap.set("n", "<leader>gB", function()
+            vim.keymap.set("n", "<leader>gl", gs.blame_line, { desc = "Blame Line" })
+            vim.keymap.set("n", "<leader>gL", function()
                 gs.blame_line({ full = true })
             end, { desc = "Blame Line (full)" })
             vim.keymap.set("n", "<leader>gd", gs.diffthis, { desc = "Diff This" })
@@ -357,7 +363,7 @@ return {
             end, { desc = "Reset Hunk" })
 
             -- Toggle git blame
-            vim.keymap.set("n", "<leader>gtb", gs.toggle_current_line_blame, { desc = "Toggle Git Blame" })
+            vim.keymap.set("n", "<leader>gt", gs.toggle_current_line_blame, { desc = "Toggle Git Blame" })
         end,
     },
 
@@ -396,6 +402,52 @@ return {
         },
     },
 
+    -- Better UI: hover, cmdline, messages, notifications
+    {
+        "folke/noice.nvim",
+        event = "VeryLazy",
+        dependencies = {
+            "MunifTanjim/nui.nvim",
+            {
+                "rcarriga/nvim-notify",
+                opts = {
+                    stages = "static",
+                    timeout = 3000,
+                },
+            },
+        },
+        opts = {
+            views = {
+                hover = {
+                    border = {
+                        style = { "", "─", "", "", "", "─", "", "" },
+                        padding = { 0, 1 },
+                    },
+                    win_options = {
+                        winhighlight = { Normal = "Folded", FloatBorder = "Folded" },
+                        winblend = 0,
+                    },
+                },
+            },
+            lsp = {
+                progress = { enabled = false }, -- keep fidget.nvim for this
+                override = {
+                    ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+                    ["vim.lsp.util.stylize_markdown"] = true,
+                    ["cmp.entry.get_documentation"] = true,
+                },
+                hover = { enabled = true },
+                signature = { enabled = true },
+            },
+            presets = {
+                bottom_search = true,
+                command_palette = true,
+                long_message_to_split = true,
+                lsp_doc_border = true,
+            },
+        },
+    },
+
     -- Better search and replace
     {
         "nvim-pack/nvim-spectre",
@@ -426,4 +478,153 @@ return {
             },
         },
     },
+
+    -- Surround text objects
+    {
+        "kylechui/nvim-surround",
+        version = "*",
+        event = "VeryLazy",
+        opts = {},
+    },
+
+    -- Flash.nvim for quick navigation
+    {
+        "folke/flash.nvim",
+        event = "VeryLazy",
+        opts = {},
+        keys = {
+            { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+            { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+            { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+            { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+        },
+    },
+
+    -- TODO comments highlighting and searching
+    {
+        "folke/todo-comments.nvim",
+        dependencies = { "nvim-lua/plenary.nvim" },
+        event = "BufReadPost",
+        opts = {},
+        keys = {
+            { "]T", function() require("todo-comments").jump_next() end, desc = "Next TODO" },
+            { "[T", function() require("todo-comments").jump_prev() end, desc = "Prev TODO" },
+            { "<leader>ft", "<cmd>TodoTelescope<CR>", desc = "Find TODOs" },
+        },
+    },
+
+    -- Diffview for git diffs
+    {
+        "sindrets/diffview.nvim",
+        cmd = { "DiffviewOpen", "DiffviewFileHistory" },
+        keys = {
+            { "<leader>gv", "<cmd>DiffviewOpen<CR>", desc = "Git Diff View" },
+            { "<leader>gh", "<cmd>DiffviewFileHistory %<CR>", desc = "Git File History" },
+            { "<leader>gH", "<cmd>DiffviewFileHistory<CR>", desc = "Git Repo History" },
+            { "<leader>gq", "<cmd>DiffviewClose<CR>", desc = "Close Diffview" },
+        },
+    },
+
+    -- Incremental rename
+    {
+        "smjonas/inc-rename.nvim",
+        cmd = "IncRename",
+        opts = {},
+    },
+
+    -- Indent guides
+    {
+        "lukas-reineke/indent-blankline.nvim",
+        main = "ibl",
+        event = "BufReadPost",
+        opts = {
+            indent = { char = "│" },
+            scope = { enabled = true, show_start = true, show_end = false },
+            exclude = {
+                filetypes = { "help", "alpha", "dashboard", "NvimTree", "Trouble", "lazy", "mason", "toggleterm" },
+            },
+        },
+    },
+
+    -- Inline color preview
+    {
+        "NvChad/nvim-colorizer.lua",
+        event = "BufReadPost",
+        opts = {
+            filetypes = { "*" },
+            user_default_options = {
+                css = true,
+                css_fn = true,
+                names = false,
+                mode = "virtualtext",
+                virtualtext = "■",
+                suppress_deprecation = true,
+            },
+        },
+    },
+
+    -- File bookmarks (Harpoon v2)
+    {
+        "ThePrimeagen/harpoon",
+        branch = "harpoon2",
+        dependencies = { "nvim-lua/plenary.nvim" },
+        keys = {
+            { "<leader>ma", function() require("harpoon"):list():add() end, desc = "Harpoon Add File" },
+            { "<C-e>", function() local harpoon = require("harpoon") harpoon.ui:toggle_quick_menu(harpoon:list()) end, desc = "Harpoon Menu" },
+            { "<leader>1", function() require("harpoon"):list():select(1) end, desc = "Harpoon File 1" },
+            { "<leader>2", function() require("harpoon"):list():select(2) end, desc = "Harpoon File 2" },
+            { "<leader>3", function() require("harpoon"):list():select(3) end, desc = "Harpoon File 3" },
+            { "<leader>4", function() require("harpoon"):list():select(4) end, desc = "Harpoon File 4" },
+        },
+        config = function()
+            require("harpoon"):setup()
+        end,
+    },
+
+    -- Subword motions (camelCase/snake_case aware)
+    {
+        "chrisgrieser/nvim-spider",
+        keys = {
+            { "w", function() require("spider").motion("w") end, mode = { "n", "o", "x" }, desc = "Spider w" },
+            { "e", function() require("spider").motion("e") end, mode = { "n", "o", "x" }, desc = "Spider e" },
+            { "b", function() require("spider").motion("b") end, mode = { "n", "o", "x" }, desc = "Spider b" },
+        },
+    },
+
+    -- Search counter virtual text
+    {
+        "kevinhwang91/nvim-hlslens",
+        event = "CmdlineEnter",
+        opts = { calm_down = true, nearest_only = true },
+        config = function(_, o)
+            require("hlslens").setup(o)
+            local kopts = { noremap = true, silent = true }
+            vim.keymap.set("n", "n", [[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>zzzv]], kopts)
+            vim.keymap.set("n", "N", [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>zzzv]], kopts)
+            vim.keymap.set("n", "*", [[*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+            vim.keymap.set("n", "#", [[#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+        end,
+    },
+
+    -- Yank ring
+    {
+        "gbprod/yanky.nvim",
+        event = "VeryLazy",
+        opts = {
+            ring = { history_length = 50, storage = "shada" },
+            highlight = { on_put = true, on_yank = true, timer = 200 },
+        },
+        keys = {
+            { "p", "<Plug>(YankyPutAfter)", mode = { "n", "x" }, desc = "Yanky put after" },
+            { "P", "<Plug>(YankyPutBefore)", mode = { "n", "x" }, desc = "Yanky put before" },
+            { "]y", "<Plug>(YankyCycleForward)", desc = "Cycle yank forward" },
+            { "[y", "<Plug>(YankyCycleBackward)", desc = "Cycle yank backward" },
+            { "<leader>fy", function() require("telescope").extensions.yank_history.yank_history({}) end, desc = "Yank History" },
+        },
+        config = function(_, o)
+            require("yanky").setup(o)
+            require("telescope").load_extension("yank_history")
+        end,
+    },
+
 }

@@ -10,7 +10,7 @@ local options = {
     formatters = {
         rustfmt = {
             command = "rustfmt",
-            args = { "--edition", "2021" },  -- Adjust edition as needed
+            args = { "--edition", "2024" },  -- Adjust edition as needed
         },
     },
 

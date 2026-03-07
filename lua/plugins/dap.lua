@@ -218,14 +218,14 @@ return {
             -- Session controls
             map('n', '<leader>dq', function() require('dap').terminate() end, { desc = 'Debug: Terminate' })
             map('n', '<leader>dR', function() require('dap').restart() end, { desc = 'Debug: Restart' })
-            map('n', '<leader>dp', function() require('dap').pause() end, { desc = 'Debug: Pause' })
+            map('n', '<leader>dP', function() require('dap').pause() end, { desc = 'Debug: Pause' })
 
             -- Breakpoint management
             map('n', '<leader>dbc', function() require('dap').clear_breakpoints() end, { desc = 'Debug: Clear All Breakpoints' })
 
             -- REPL
             map('n', '<leader>drl', function() require('dap').repl.open() end, { desc = 'Debug: Open REPL' })
-            map('n', '<leader>drl', function() require('dap').repl.run_last() end, { desc = 'Debug: Run Last' })
+            map('n', '<leader>drr', function() require('dap').repl.run_last() end, { desc = 'Debug: Run Last' })
 
             -- Hover variables (multiple ways to access)
             map('n', '<leader>dh', function() require('dap.ui.widgets').hover() end, { desc = 'Debug: Hover Variables' })
@@ -306,12 +306,13 @@ return {
                 { "<leader>de", desc = "Eval" },
                 { "<leader>dq", desc = "Quit" },
                 { "<leader>dR", desc = "Restart" },
-                { "<leader>dp", desc = "Pause" },
+                { "<leader>dP", desc = "Pause" },
                 { "<leader>dh", desc = "Hover" },
                 { "<leader>dw", desc = "Widgets" },
                 { "<leader>dl", group = "Log/REPL" },
                 { "<leader>dlp", desc = "Log Point" },
                 { "<leader>drl", desc = "Open REPL" },
+                { "<leader>drr", desc = "Run Last" },
                 { "<leader>dbc", desc = "Clear All Breakpoints" },
             })
         end,
